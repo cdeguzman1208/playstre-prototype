@@ -101,6 +101,38 @@ function renderEditorScreen(params) {
             <div class="flex-1 bg-gray-100 flex items-center justify-center p-8" id="game-preview">
                 ${renderGamePreview()}
             </div>
+
+            <!-- Publish Success Modal -->
+            <div id="publish-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
+                <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6 text-center space-y-4">
+                    <h2 class="text-xl font-semibold text-gray-900">Your game is live 🎉</h2>
+                    <p class="text-sm text-gray-600">
+                        Your game has been saved. Share it or head back to your dashboard.
+                    </p>
+    
+                    <div class="flex items-center gap-2">
+                        <input
+                            id="share-link-input"
+                            type="text"
+                            readonly
+                            class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-600 bg-gray-50"
+                        />
+                        <button
+                            id="copy-link-btn"
+                            class="px-3 py-2 bg-gray-100 rounded-lg text-sm hover:bg-gray-200 transition"
+                        >
+                            Copy
+                        </button>
+                    </div>
+    
+                    <button
+                        id="return-dashboard-btn"
+                        class="w-full px-4 py-3 bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-600 transition-colors"
+                    >
+                        Save & Return to Dashboard
+                    </button>
+                </div>
+            </div>    
         </div>
     `;
 }
@@ -147,12 +179,13 @@ function initEditorScreen() {
             }
         });
     }
-    
+
     // Handle publish button
-    const publishBtn = document.getElementById('publish-btn');
-    if (publishBtn) {
-        publishBtn.addEventListener('click', handlePublish);
-    }
+    document.getElementById('publish-btn')?.addEventListener('click', handlePublish);
+
+    // Modal buttons
+    document.getElementById('copy-link-btn')?.addEventListener('click', copyShareLink);
+    document.getElementById('return-dashboard-btn')?.addEventListener('click', finalizePublish);
 }
 
 
@@ -197,23 +230,62 @@ function updateChatUI() {
 
 function handlePublish() {
     if (!editorState.currentGame) {
-        // Should not happen, but redirect to dashboard if it does
         navigateTo('home');
         return;
     }
-    
+
     // Save game
-    const existingIndex = appState.createdGames.findIndex(g => g.id === editorState.currentGame.id);
+    const existingIndex = appState.createdGames.findIndex(
+        g => g.id === editorState.currentGame.id
+    );
+
     if (existingIndex >= 0) {
         appState.createdGames[existingIndex] = editorState.currentGame;
     } else {
         appState.createdGames.push(editorState.currentGame);
     }
-    localStorage.setItem('playstre_games', JSON.stringify(appState.createdGames));
-    
+
+    localStorage.setItem(
+        'playstre_games',
+        JSON.stringify(appState.createdGames)
+    );
+
+    // Generate fake share link
+    const shareUrl = `${window.location.origin}/play/${editorState.currentGame.id}`;
+
+    const linkInput = document.getElementById('share-link-input');
+    if (linkInput) {
+        linkInput.value = shareUrl;
+    }
+
+    // Show modal
+    const modal = document.getElementById('publish-modal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+}
+
+function copyShareLink() {
+    const input = document.getElementById('share-link-input');
+    if (!input) return;
+
+    input.select();
+    input.setSelectionRange(0, 99999);
+    navigator.clipboard.writeText(input.value);
+}
+
+function finalizePublish() {
     // Reset editor state
     editorState.chatMessages = [];
-    
+
+    // Hide modal
+    const modal = document.getElementById('publish-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
     // Return to dashboard
     navigateTo('home');
 }

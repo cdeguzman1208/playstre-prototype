@@ -44,14 +44,32 @@ function renderHomeScreen(params) {
     
     // Generate pinned tags
     const pinnedTags = getPinnedTags();
-    const pinnedTagsHtml = pinnedTags.length > 0 
-        ? `<div class="flex flex-wrap gap-2 mb-6" id="pinned-tags-container">${pinnedTags.map(tag => `
-            <span class="pinned-tag px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm flex items-center gap-2" data-category="${tag.category}" data-value="${tag.value}">
-                ${tag.text}
-                <button class="unpin-btn text-blue-600 hover:text-blue-800" data-category="${tag.category}">×</button>
-            </span>
-        `).join('')}</div>`
-        : '';
+    const pinnedTagsHtml = pinnedTags.length > 0
+    ? `
+        <div class="mt-6 flex justify-center">
+            <div
+                id="pinned-tags-container"
+                class="flex flex-wrap justify-center gap-2 max-w-2xl"
+            >
+                ${pinnedTags.map(tag => `
+                    <span
+                        class="pinned-tag px-3 py-1 bg-white text-blue-800 rounded-full text-sm flex items-center gap-2"
+                        data-category="${tag.category}"
+                        data-value="${tag.value}"
+                    >
+                        ${tag.text}
+                        <button
+                            class="unpin-btn text-blue-800 hover:text-red-600"
+                            data-category="${tag.category}"
+                        >
+                            ×
+                        </button>
+                    </span>
+                `).join('')}
+            </div>
+        </div>
+    `
+    : '';
     
     const myGamesHtml = myGames.length > 0 
         ? myGames.map(game => createDashboardGameCard(game)).join('')
@@ -62,18 +80,29 @@ function renderHomeScreen(params) {
     
     return `
         <div class="min-h-screen bg-white">
-            <div class="max-w-6xl mx-auto px-8 py-16">
-                <!-- Welcome Section -->
-                <div class="mb-20 text-center">
-                    <h1 class="text-5xl font-bold text-gray-900 mb-4">Welcome to Playstre</h1>
-                    <p class="text-xl text-gray-600 mb-8">Describe a game or pick a starting point</p>
+            <!-- Splash / Welcome Section -->
+            <div class="bg-gradient-to-br from-blue-300 via-green-100 to-purple-300">
+                <button
+                    id="logout-btn"
+                    class="absolute top-6 right-8 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                    Log out
+                </button>
+                <div class="max-w-6xl mx-auto px-8 py-20 text-center">
+                    <h1 class="text-5xl font-bold text-gray-900 mt-4 mb-4">
+                        Welcome to Playstre
+                    </h1>
+                    <p class="text-xl text-gray-600 mb-8">
+                        Describe a game or pick a starting point
+                    </p>
+
                     <div class="flex items-center gap-3 max-w-2xl mx-auto">
                         <input 
                             type="text" 
                             id="welcome-input" 
                             placeholder="Describe your game idea..." 
                             disabled
-                            class="flex-1 px-6 py-4 text-lg border border-gray-200 rounded-xl bg-gray-50 text-gray-400 cursor-not-allowed focus:outline-none shadow-sm"
+                            class="flex-1 px-6 py-4 text-lg border border-gray-200 rounded-xl bg-white/80 text-gray-400 cursor-not-allowed focus:outline-none shadow-sm backdrop-blur"
                         >
                         <button 
                             id="confirm-build-btn" 
@@ -83,23 +112,33 @@ function renderHomeScreen(params) {
                             Build
                         </button>
                     </div>
+
+                    <!-- Pinned Tags -->
+                    ${pinnedTagsHtml}
                 </div>
+            </div>
 
-                <!-- Pinned Tags Section -->
-                ${pinnedTagsHtml}
-
+            <!-- Main Content Section -->
+            <div class="max-w-6xl mx-auto px-8 py-16">
                 <!-- Suggestions Section -->
                 <div class="mb-20">
-                    <h2 class="text-2xl font-semibold text-gray-900 mb-6">Suggestions</h2>
+                    <h2 class="text-2xl font-semibold text-gray-900 mb-6">
+                        Suggestions
+                    </h2>
                     <div class="flex flex-wrap gap-3" id="suggestions-container">
                         ${suggestionsHtml}
                     </div>
                 </div>
 
                 <!-- My Games Section -->
-                <div>
-                    <h2 class="text-2xl font-semibold text-gray-900 mb-6">My Games</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="my-games-container">
+                <div class="bg-gray-50 rounded-2xl p-8">
+                    <h2 class="text-2xl font-semibold text-gray-900 mb-6">
+                        My Games
+                    </h2>
+                    <div
+                        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                        id="my-games-container"
+                    >
                         ${myGamesHtml}
                     </div>
                 </div>
@@ -109,6 +148,17 @@ function renderHomeScreen(params) {
 }
 
 function initHomeScreen() {
+    // Handle logout
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            const confirmed = confirm('Log out of Playstre?');
+            if (!confirmed) return;
+
+            logout();
+        });
+    }
+
     // Handle suggestion clicks
     document.querySelectorAll('.suggestion-chip').forEach(chip => {
         chip.addEventListener('click', () => {

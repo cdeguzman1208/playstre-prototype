@@ -44,3 +44,18 @@ function showAppShell() {
     console.log('showAppShell: #app.innerHTML length =', document.getElementById('app')?.innerHTML?.length || 0);
 }
 
+function logout() {
+    console.log('Logging out');
+
+    // Clear persisted data
+    localStorage.removeItem('playstre_user');
+    localStorage.removeItem('playstre_games');
+
+    // Reset app state
+    appState.currentUser = null;
+    appState.createdGames = [];
+    appState.isAuthenticated = false;
+
+    // Go back to auth screen
+    showAuthScreen();
+}
