@@ -10,6 +10,10 @@ document.addEventListener('DOMContentLoaded', () => {
     registerScreen('auth', renderAuthScreen, initAuthScreen);
     registerScreen('home', renderHomeScreen, initHomeScreen);
     registerScreen('editor', renderEditorScreen, initEditorScreen);
+    registerScreen('store', renderStoreScreen, initStoreScreen);
+    registerScreen('social', renderSocialScreen, initSocialScreen);
+    registerScreen('profile', renderProfileScreen, initProfileScreen);
+    registerScreen('settings', renderSettingsScreen, initSettingsScreen);
     
     // Load user state and show appropriate screen
     if (savedUser) {

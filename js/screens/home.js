@@ -1,5 +1,4 @@
 // Dashboard screen (Home)
-
 const basePath = window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '');
 const heroUrl = `${basePath}/assets/hero.gif`;
 
@@ -111,7 +110,6 @@ function getStepHeading() {
 }
 
 function renderHomeScreen(params) {
-    // Progress bar HTML
     const progressSteps = getProgressSteps();
     const progressHtml = `
         <div class="flex gap-2 mb-8 justify-center">
@@ -129,135 +127,90 @@ function renderHomeScreen(params) {
         </div>
     `;
 
-    // Reset dashboard state if not already set
-    if (!dashboardState.pinnedType && !dashboardState.pinnedSubtype && 
-        !dashboardState.pinnedTheme && !dashboardState.pinnedPlayers) {
-        dashboardState = {
-            pinnedType: null,
-            pinnedSubtype: null,
-            pinnedTheme: null,
-            pinnedPlayers: null
-        };
-    }
-    
     const myGames = appState.createdGames.sort((a, b) => 
         new Date(b.createdAt) - new Date(a.createdAt)
     );
-    
-    // Generate suggestions based on current pinned state
+
     const suggestions = getCurrentSuggestions();
     const suggestionsHtml = suggestions.map((suggestion, index) => `
         <button class="suggestion-chip" data-suggestion-index="${index}" data-category="${suggestion.category}" data-value="${suggestion.value}">
             ${suggestion.text}
         </button>
     `).join('');
-    
-    // Generate pinned tags
+
     const pinnedTags = getPinnedTags();
     const pinnedTagsHtml = pinnedTags.length > 0
-    ? `
-        <div class="mt-6 flex justify-center">
-            <div
-                id="pinned-tags-container"
-                class="flex flex-wrap justify-center gap-2 max-w-2xl"
-            >
-                ${pinnedTags.map(tag => `
-                    <span
-                        class="pinned-tag px-3 py-1 bg-gray-900 text-blue-400 border border-gray-700 rounded-full text-sm flex items-center gap-2"
-                        data-category="${tag.category}"
-                        data-value="${tag.value}"
-                    >
-                        ${tag.text}
-                        <button
-                            class="unpin-btn text-blue-500 hover:text-red-600"
-                            data-category="${tag.category}"
-                        >
-                            ×
-                        </button>
-                    </span>
-                `).join('')}
-            </div>
-        </div>
-    `
-    : '';
-    
+        ? `<div class="mt-6 flex justify-center">
+                <div id="pinned-tags-container" class="flex flex-wrap justify-center gap-2 max-w-2xl">
+                    ${pinnedTags.map(tag => `
+                        <span class="pinned-tag px-3 py-1 bg-gray-900 text-blue-400 border border-gray-700 rounded-full text-sm flex items-center gap-2"
+                              data-category="${tag.category}" data-value="${tag.value}">
+                            ${tag.text}
+                            <button class="unpin-btn text-blue-500 hover:text-red-600" data-category="${tag.category}">×</button>
+                        </span>
+                    `).join('')}
+                </div>
+            </div>`
+        : '';
+
     const myGamesHtml = myGames.length > 0 
         ? myGames.map(game => createDashboardGameCard(game)).join('')
         : '<p class="text-gray-400 text-center py-8">No games yet. Create your first game by following the steps above!</p>';
-    
+
     const canBuild = dashboardState.pinnedType && dashboardState.pinnedSubtype && 
                      dashboardState.pinnedTheme && dashboardState.pinnedPlayers;
-    
+
     return `
-        <div class="min-h-screen bg-gray-950 text-gray-100">
-            <!-- Splash / Welcome Section -->
-            <div
-                class="relative bg-cover bg-center"
-                style="background-image: url('${heroUrl}');"
-            >
-            <div class="backdrop-blur-[2px]">
-                <button
-                    id="logout-btn"
-                    class="absolute top-6 right-8 text-sm font-medium text-gray-200 hover:text-white transition-colors"
-                >
-                    Log out
-                </button>
-                <div class="max-w-6xl mx-auto px-8 py-20 text-center">
-                    <h1 class="text-5xl font-bold text-white mt-4 mb-4">
-                        Welcome to Playstre
-                    </h1>
-                    <p class="text-xl text-gray-200 mb-8">
-                        Describe a game or pick a starting point
-                    </p>
+        <div class="min-h-screen bg-gray-950 text-gray-100 relative">
+            <!-- Top Header -->
+            ${renderTopHeader()}
 
-                    <div class="flex items-center gap-3 max-w-2xl mx-auto">
-                        <input 
-                            type="text" 
-                            id="welcome-input" 
-                            placeholder="Describe your game idea..." 
-                            disabled
-                            class="flex-1 px-6 py-4 text-lg border border-gray-200 rounded-xl bg-white/80 text-gray-600 cursor-not-allowed focus:outline-none shadow-sm backdrop-blur"
-                        >
-                        <button 
-                            id="confirm-build-btn" 
-                            class="px-8 py-4 bg-blue-500 text-white rounded-xl font-semibold text-lg hover:bg-blue-600 transition-colors disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:bg-blue-500"
-                            ${canBuild ? '' : 'disabled'}
-                        >
-                            Build
-                        </button>
-                    </div>
+            <!-- Sidebar Overlay is managed separately by initSidebar() -->
 
-                    <!-- Pinned Tags -->
-                    ${pinnedTagsHtml}
-                </div>
-            </div>
-            </div>
+            <!-- Page Content (padding-top = header height) -->
+            <div class="pt-0">
+                <!-- Splash / Welcome Section -->
+                <div class="relative bg-cover bg-center" style="background-image: url('${heroUrl}');">
+                    <div class="backdrop-blur-[2px]">
+                        <div class="max-w-6xl mx-auto px-8 py-20 text-center">
+                            <h1 class="text-5xl font-bold text-white mt-4 mb-4">Welcome to Playstre</h1>
+                            <p class="text-xl text-gray-200 mb-8">Describe a game or pick a starting point</p>
 
-            <!-- Main Content Section -->
-            <div class="max-w-6xl mx-auto px-8 py-12">
-                <!-- Suggestions Section -->
-                <div class="mb-20">
-                    ${progressHtml}
-                    <h2 class="text-2xl font-semibold text-gray-100 mb-6">
-                        ${getStepHeading()}
-                    </h2>
-                    <div class="flex flex-wrap gap-3" id="suggestions-container">
-                        ${suggestions.length > 0 
-                            ? suggestionsHtml 
-                            : '<p class="text-gray-400 text-left w-full">Press the build button to generate your game.</p>'}
+                            <div class="flex items-center gap-3 max-w-2xl mx-auto">
+                                <input type="text" id="welcome-input" placeholder="Describe your game idea..."
+                                    disabled
+                                    class="flex-1 px-6 py-4 text-lg border border-gray-200 rounded-xl bg-white/90 text-gray-600 cursor-not-allowed focus:outline-none shadow-sm backdrop-blur"
+                                >
+                                <button id="confirm-build-btn"
+                                    class="px-8 py-4 bg-blue-500 text-white rounded-xl font-semibold text-lg hover:bg-blue-600 transition-colors disabled:opacity-80 disabled:cursor-not-allowed disabled:hover:bg-blue-500"
+                                    ${canBuild ? '' : 'disabled'}>
+                                    Build
+                                </button>
+                            </div>
+
+                            <!-- Pinned Tags -->
+                            ${pinnedTagsHtml}
+                        </div>
                     </div>
                 </div>
 
-                <!-- My Games Section -->
-                <div class="bg-gray-900 rounded-2xl p-8 border border-gray-800">
-                    <h2 class="text-2xl font-semibold text-gray-100 mb-6">
-                        My Games
-                    </h2>
-                    <div
-                        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-                        id="my-games-container"
-                    >
-                        ${myGamesHtml}
+                <!-- Main Content Section -->
+                <div class="max-w-6xl mx-auto px-8 py-12">
+                    <!-- Suggestions Section -->
+                    <div class="mb-20">
+                        ${progressHtml}
+                        <h2 class="text-2xl font-semibold text-gray-100 mb-6">${getStepHeading()}</h2>
+                        <div class="flex flex-wrap gap-3" id="suggestions-container">
+                            ${suggestions.length > 0 ? suggestionsHtml : '<p class="text-gray-400 text-left w-full">Press the build button to generate your game.</p>'}
+                        </div>
+                    </div>
+
+                    <!-- My Games Section -->
+                    <div class="bg-gray-900 rounded-2xl p-8 border border-gray-800">
+                        <h2 class="text-2xl font-semibold text-gray-100 mb-6">My Games</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="my-games-container">
+                            ${myGamesHtml}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -265,7 +218,16 @@ function renderHomeScreen(params) {
     `;
 }
 
+
 function initHomeScreen() {
+    // Sidebar setup
+    initSidebar();
+
+    const menuButton = document.getElementById('menu-button');
+    if (menuButton) {
+        menuButton.onclick = () => openSidebar();
+    }
+
     // Handle logout
     const logoutBtn = document.getElementById('logout-btn');
     if (logoutBtn) {
