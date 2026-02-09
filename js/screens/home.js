@@ -170,9 +170,12 @@ function renderHomeScreen(params) {
             <!-- Page Content (padding-top = header height) -->
             <div class="pt-0">
                 <!-- Splash / Welcome Section -->
-                <div class="relative bg-cover bg-center" style="background-image: url('${heroUrl}');">
+                <div
+                    class="relative bg-cover bg-center min-h-[60vh]"
+                    style="background-image: url('${heroUrl}');"
+                >
                     <div class="backdrop-blur-[2px]">
-                        <div class="max-w-6xl mx-auto px-8 py-20 text-center">
+                        <div class="max-w-6xl mx-auto px-8 pt-32 pb-18 text-center">
                             <h1 class="text-5xl font-bold text-white mt-4 mb-4">Welcome to Playstre</h1>
                             <p class="text-xl text-gray-200 mb-8">Describe a game or pick a starting point</p>
 
